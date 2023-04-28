@@ -18,20 +18,20 @@
 #include <cmath>
 #include <iostream>
 
-#include "single-track-model.hpp"
+#include "differential.hpp"
 
 #define R (0.12)    // radius of the robot (in m)
 #define r (0.04)    // radius of the wheel (in m)
 
 Differential(const float vx0 = 0.0f, const float vy0 = 0.0f, const float yaw0 = 0.0f) noexcept
-  isAxleAngularVelocityLeft(false),
-  isAxleAngularVelocityRight(false),
-  vx(vx0),
-  vy(vy0),
-  yaw_rate(0.0f),
-  yaw(yaw0),
-  vl(0.0f),
-  vr(0.0f)
+  isAxleAngularVelocityLeft{false},
+  isAxleAngularVelocityRight{false},
+  vx{vx0},
+  vy{vy0},
+  yaw_rate{0.0f},
+  yaw{yaw0},
+  vl{0.0f},
+  vr{0.0f}
 {
 }
 
