@@ -1,0 +1,16 @@
+# Ignore build artifacts
+build/
+*.o
+*.exe
+
+# Ignore Docker files and directories
+.dockerignore
+docker-compose.yml
+docker/
+.docker/
+docker-compose.override.yml
+
+# Ignore IDE-specific files
+.vscode/
+*.swp
+*.swo
