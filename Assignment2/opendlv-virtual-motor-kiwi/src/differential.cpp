@@ -20,8 +20,8 @@
 
 #include "differential.hpp"
 
-#define R (0.12)    // radius of the robot (in m)
-#define r (0.04)    // radius of the wheel (in m)
+#define R (0.12f)    // radius of the robot (in m)
+#define r (0.04f)    // radius of the wheel (in m)
 
 Differential::Differential(const float vx0, const float vy0, const float yaw0) noexcept :
   m_AxleAngularVelocityLeftMutex{},
