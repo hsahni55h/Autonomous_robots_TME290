@@ -23,7 +23,7 @@
 #define R (0.12)    // radius of the robot (in m)
 #define r (0.04)    // radius of the wheel (in m)
 
-Differential::Differential(float vx0, float vy0, float yaw0) noexcept :
+Differential::Differential(const float vx0, const float vy0, const float yaw0) noexcept :
   isAxleAngularVelocityLeft{false},
   isAxleAngularVelocityRight{false},
   vx{vx0},
