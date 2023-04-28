@@ -24,8 +24,8 @@
 #define r (0.04)    // radius of the wheel (in m)
 
 Differential::Differential(const float vx0, const float vy0, const float yaw0) noexcept :
-  isAxleAngularVelocityLeft{false},
-  isAxleAngularVelocityRight{false},
+  isAxleAngularVelocityLeftNew{false},
+  isAxleAngularVelocityRightNew{false},
   vx{vx0},
   vy{vy0},
   yaw_rate{0.0f},
