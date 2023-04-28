@@ -28,6 +28,8 @@ Differential::Differential(const float vx0, const float vy0, const float yaw0) n
   m_AxleAngularVelocityRightMutex{},
   isAxleAngularVelocityLeftNew{false},
   isAxleAngularVelocityRightNew{false},
+  AxleAngularVelocityLeft{0.0f},
+  AxleAngularVelocityRight{0.0f},
   vx{vx0},
   vy{vy0},
   yaw_rate{0.0f},
@@ -69,7 +71,7 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     // convert axle speed to wheel speed 
     this->vl = this->AxleAngularVelocityLeft * R;
     this->vr = this->AxleAngularVelocityRight * R;
-    
+
     // calculations for yaw_rate vx vy from lecture notes
     v = (this->vl + this->vr) / 2.0f;
     this->yaw_rate = (this->vr - this->vl) / (2*R);    // phi_dot
