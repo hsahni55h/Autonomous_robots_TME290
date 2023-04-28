@@ -39,7 +39,7 @@ class Differential {
     volatile float vr;	// rad/s
     
   public:
-    Differential(const float vx0 = 0.0f, const float vy0 = 0.0f, const float yaw0 = 0.0f) noexcept;
+    Differential(float vx0 = 0.0f, float vy0 = 0.0f, float yaw0 = 0.0f) noexcept;
     ~Differential() {};
     void setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_left) noexcept;
     void setAxleAngularVelocityRight(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_right) noexcept;
