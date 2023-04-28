@@ -40,7 +40,7 @@ class Differential {
     
   public:
     Differential(const float vx0 = 0.0f, const float vy0 = 0.0f, const float yaw0 = 0.0f) noexcept;
-    ~Differential();
+    ~Differential() {};
     void setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_left) noexcept;
     void setAxleAngularVelocityRight(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_right) noexcept;
     opendlv::sim::KinematicState step(const double dt) noexcept;

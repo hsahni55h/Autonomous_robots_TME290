@@ -24,16 +24,14 @@
 #define r (0.04)    // radius of the wheel (in m)
 
 Differential(const float vx0, const float vy0, const float yaw_rate0) noexcept
-  m_AxleAngularVelocityLeftMutex{},
-  m_AxleAngularVelocityRightMutex{},
-  isAxleAngularVelocityLeft{false},
-  isAxleAngularVelocityRight{false},
-  vx{vx0},
-  vy{vy0},
-  yaw_rate{0.0f},
-  yaw{yaw0},
-  vl{0.0f},
-  vr{0.0f}
+  isAxleAngularVelocityLeft(false),
+  isAxleAngularVelocityRight(false),
+  vx(vx0),
+  vy(vy0),
+  yaw_rate(0.0f),
+  yaw(yaw0),
+  vl(0.0f),
+  vr(0.0f)
 {
 }
 
