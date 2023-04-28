@@ -42,7 +42,7 @@ void Differential::setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularV
   std::lock_guard<std::mutex> lock(m_AxleAngularVelocityLeftMutex);
 
   // TODO: ideally a queue with timestamp must be maintained
-  this->vl = axle_ang_vel_left.axleAngularVelocity();
+  this->AxleAngularVelocityLeft = axle_ang_vel_left.axleAngularVelocity();
   isAxleAngularVelocityLeftNew = true;    // new data flag set
 }
 
@@ -51,7 +51,7 @@ void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngular
   std::lock_guard<std::mutex> lock(m_AxleAngularVelocityRightMutex);
 
   // TODO: ideally a queue with timestamp must be maintained
-  this->vr = axle_ang_vel_right.axleAngularVelocity();
+  this->AxleAngularVelocityRight = axle_ang_vel_right.axleAngularVelocity();
   isAxleAngularVelocityRightNew = true;   // new data flag set
 }
 
@@ -67,9 +67,9 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
     
     // convert axle speed to wheel speed 
-    this->vl = m_AxleAngularVelocityLeftMutex * R;
-    this->vr = m_AxleAngularVelocityLeftMutex * R;
-
+    this->vl = this->AxleAngularVelocityLeft * R;
+    this->vr = this->AxleAngularVelocityRight * R;
+    
     // calculations for yaw_rate vx vy from lecture notes
     v = (this->vl + this->vr) / 2.0f;
     this->yaw_rate = (this->vr - this->vl) / (2*R);    // phi_dot
