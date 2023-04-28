@@ -73,11 +73,11 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     this->vr = this->AxleAngularVelocityRight * R;
 
     // calculations for yaw_rate vx vy from lecture notes
-    v = (this->vl + this->vr) / 2.0f;
+    float v = (this->vl + this->vr) / 2.0f;
     this->yaw_rate = (this->vr - this->vl) / (2*R);    // phi_dot
-    this->yaw = this->yaw + this->yaw_rate;            // using the logic: phi(t+1) = phi(t) + phi_dot
-    this->vx = v*cos(theta);
-    this->vy = v*sin(theta);
+    this->yaw = this->yaw + this->yaw_rate*dt;            // using the logic: phi(t+1) = phi(t) + phi_dot*dt
+    this->vx = v*cos(this->yaw);
+    this->vy = v*sin(this->yaw);
 
     // // new data flag clear
     isAxleAngularVelocityLeftNew = false;
@@ -87,7 +87,7 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
   // compute kinematic state    
   k_state.vx(static_cast<float>(this->vx));
   k_state.vy(static_cast<float>(this->vy));
-  k_state.yawRate(static_cast<float>(this->vz));
+  k_state.yawRate(static_cast<float>(this->yaw_rate));
   return k_state;
 }
 
