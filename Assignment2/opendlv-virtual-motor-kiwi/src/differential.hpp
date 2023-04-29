@@ -24,10 +24,14 @@
 
 class Differential {
   private:
-    std::mutex m_AxleAngularVelocityLeftMutex;
+    std::mutex m_AxleAngularVelocityLeftMutex;    // to avoid shared access
     std::mutex m_AxleAngularVelocityRightMutex;
-    volatile bool isAxleAngularVelocityLeftNew;
+
+    volatile bool isAxleAngularVelocityLeftNew;   // to avoid repeated update on no new data
     volatile bool isAxleAngularVelocityRightNew;
+    
+    float AxleAngularVelocityLeft;    // actual vales of axle velocities
+    float AxleAngularVelocityRight;
     
     // state
     float vx;		        // m/s

@@ -18,20 +18,24 @@
 #include <cmath>
 #include <iostream>
 
-#include "single-track-model.hpp"
+#include "differential.hpp"
 
-#define R (0.12)    // radius of the robot (in m)
-#define r (0.04)    // radius of the wheel (in m)
+#define R (0.12f)    // radius of the robot (in m)
+#define r (0.04f)    // radius of the wheel (in m)
 
-Differential(const float vx0 = 0.0f, const float vy0 = 0.0f, const float yaw0 = 0.0f) noexcept
-  isAxleAngularVelocityLeft(false),
-  isAxleAngularVelocityRight(false),
-  vx(vx0),
-  vy(vy0),
-  yaw_rate(0.0f),
-  yaw(yaw0),
-  vl(0.0f),
-  vr(0.0f)
+Differential::Differential(const float vx0, const float vy0, const float yaw0) noexcept :
+  m_AxleAngularVelocityLeftMutex{},
+  m_AxleAngularVelocityRightMutex{},
+  isAxleAngularVelocityLeftNew{false},
+  isAxleAngularVelocityRightNew{false},
+  AxleAngularVelocityLeft{0.0f},
+  AxleAngularVelocityRight{0.0f},
+  vx{vx0},
+  vy{vy0},
+  yaw_rate{0.0f},
+  yaw{yaw0},
+  vl{0.0f},
+  vr{0.0f}
 {
 }
 
@@ -40,7 +44,7 @@ void Differential::setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularV
   std::lock_guard<std::mutex> lock(m_AxleAngularVelocityLeftMutex);
 
   // TODO: ideally a queue with timestamp must be maintained
-  this->vl = axle_ang_vel_left.axleAngularVelocity();
+  this->AxleAngularVelocityLeft = axle_ang_vel_left.axleAngularVelocity();
   isAxleAngularVelocityLeftNew = true;    // new data flag set
 }
 
@@ -49,7 +53,7 @@ void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngular
   std::lock_guard<std::mutex> lock(m_AxleAngularVelocityRightMutex);
 
   // TODO: ideally a queue with timestamp must be maintained
-  this->vr = axle_ang_vel_right.axleAngularVelocity();
+  this->AxleAngularVelocityRight = axle_ang_vel_right.axleAngularVelocity();
   isAxleAngularVelocityRightNew = true;   // new data flag set
 }
 
@@ -61,19 +65,19 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
   if(isAxleAngularVelocityLeftNew && isAxleAngularVelocityRightNew)
   {
     // acquire MUTEX
-    std::lock_guard<std::mutex> lock(m_AxleAngularVelocityLeftMutex);
-    std::lock_guard<std::mutex> lock(m_AxleAngularVelocityRightMutex);
+    std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
+    std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
     
     // convert axle speed to wheel speed 
-    this->vl = m_AxleAngularVelocityLeftMutex * R;
-    this->vr = m_AxleAngularVelocityLeftMutex * R;
+    this->vl = this->AxleAngularVelocityLeft * R;
+    this->vr = this->AxleAngularVelocityRight * R;
 
     // calculations for yaw_rate vx vy from lecture notes
-    v = (this->vl + this->vr) / 2.0f;
+    float v = (this->vl + this->vr) / 2.0f;
     this->yaw_rate = (this->vr - this->vl) / (2*R);    // phi_dot
-    this->yaw = this->yaw + this->yaw_rate;            // using the logic: phi(t+1) = phi(t) + phi_dot
-    this->vx = v*cos(theta);
-    this->vy = v*sin(theta);
+    this->yaw = this->yaw + this->yaw_rate * static_cast<float>(dt);            // using the logic: phi(t+1) = phi(t) + phi_dot*dt
+    this->vx = v * static_cast<float>(cos(this->yaw));
+    this->vy = v * static_cast<float>(sin(this->yaw));
 
     // // new data flag clear
     isAxleAngularVelocityLeftNew = false;
@@ -83,7 +87,7 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
   // compute kinematic state    
   k_state.vx(static_cast<float>(this->vx));
   k_state.vy(static_cast<float>(this->vy));
-  k_state.yawRate(static_cast<float>(this->vz));
+  k_state.yawRate(static_cast<float>(this->yaw_rate));
   return k_state;
 }
 
