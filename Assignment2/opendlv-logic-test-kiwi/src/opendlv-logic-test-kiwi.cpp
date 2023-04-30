@@ -44,15 +44,23 @@ int32_t main(int32_t argc, char **argv)
     uint16_t const CID = std::stoi(commandlineArguments["cid"]);
     float const FREQ = std::stof(commandlineArguments["freq"]);
     
-    auto onKinematicState{[](cluon::data::Envelope &&envelope) {
+    opendlv::sim::KinematicState kinematicState{};
+
+    auto onKinematicState{[&VERBOSE, &kinematicState](cluon::data::Envelope &&envelope) {
       uint32_t const senderStamp = envelope.senderStamp();
       if(senderStamp == INPUT_ID_LEFT_WHEEL || senderStamp == INPUT_ID_RIGHT_WHEEL)
       {
-        auto kinematicState = cluon::extractMessage<opendlv::sim::KinematicState>(std::move(envelope));
+        auto k_state = cluon::extractMessage<opendlv::sim::KinematicState>(std::move(envelope));
+        kinematicState.vx() = k_state.vx();
+        kinematicState.vy() = k_state.vy();
+        kinematicState.vz() = k_state.vz();
+        kinematicState.rollRate() = k_state.rollRate();
+        kinematicState.pitchRate() = k_state.pitchRate();
+        kinematicState.yawRate() = k_state.yawRate();
 
         if (VERBOSE) {
-          std::cout << "Kinematic state with id " << FRAME_ID
-            << " is at velocity [vx=" << kinematicState.vx() 
+          std::cout << "Kinematic state : "
+            << " has velocity [vx=" << kinematicState.vx() 
             << ", vy=" << kinematicState.vy() << ", vz=" << kinematicState.vz() 
             << "] with the rotation rate [rollRate=" 
             << kinematicState.rollRate() << ", pitchRate=" 
@@ -67,7 +75,7 @@ int32_t main(int32_t argc, char **argv)
     od4.dataTrigger(opendlv::sim::kinematicState::ID(), onKinematicState);
 
     // Lambda function to run at a specified frequency.
-    auto atFrequency{[&VERBOSE, &behavior, &od4]() -> bool
+    auto atFrequency{[&VERBOSE, &od4]() -> bool
     {
       cluon::data::TimeStamp sampleTime = cluon::time::now();
 
