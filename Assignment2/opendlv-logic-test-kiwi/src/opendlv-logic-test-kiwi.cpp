@@ -23,6 +23,7 @@
 
 #define T1 3000000.0f
 #define T2 10000000.0f
+#define V0 0.5f
 
 int32_t main(int32_t argc, char **argv) 
 { 
@@ -84,12 +85,12 @@ int32_t main(int32_t argc, char **argv)
       if(sampleTime_float >= 0.0 && sampleTime_float <= T1)
       {
         axle_ang_vel_left.axleAngularVelocity(0.0f);
-        axle_ang_vel_right.axleAngularVelocity(v0*(sampleTime_float/T1));
+        axle_ang_vel_right.axleAngularVelocity(V0*(sampleTime_float/T1));
       } 
       else if(sampleTime_float > T1 && sampleTime_float <= T2)
       {
-        axle_ang_vel_left.axleAngularVelocity(v0*((sampleTime_float - T1)/T2));
-        axle_ang_vel_right.axleAngularVelocity(v0);
+        axle_ang_vel_left.axleAngularVelocity(V0*((sampleTime_float - T1)/T2));
+        axle_ang_vel_right.axleAngularVelocity(V0);
       } 
       else
       {
