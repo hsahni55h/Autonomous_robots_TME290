@@ -21,8 +21,11 @@
 #define INPUT_ID_LEFT_WHEEL  0
 #define INPUT_ID_RIGHT_WHEEL 1
 
-#define T1 3.0f
-#define T2 10.0f
+#define T1 3000000.0f
+#define T2 10000000.0f
+#define V0 0.5f
+
+#define opendlv_sim_kinematicState_ID 1002
 
 int32_t main(int32_t argc, char **argv) 
 { 
@@ -44,18 +47,23 @@ int32_t main(int32_t argc, char **argv)
     uint16_t const CID = std::stoi(commandlineArguments["cid"]);
     float const FREQ = std::stof(commandlineArguments["freq"]);
     
-    auto onKinematicState{[&INPUT_ID](cluon::data::Envelope &&envelope) {
+    opendlv::sim::KinematicState kinematicState{};
+
+    auto onKinematicState{[&VERBOSE, &kinematicState](cluon::data::Envelope &&envelope) {
       uint32_t const senderStamp = envelope.senderStamp();
-      if(senderStamp == INPUT_ID)
+      if(senderStamp == INPUT_ID_LEFT_WHEEL || senderStamp == INPUT_ID_RIGHT_WHEEL)
       {
-        auto kinematicState = cluon::extractMessage<opendlv::sim::KinematicState>(std::move(envelope));
-        this->vx = kinematicState.vx();
-        this->vy = kinematicState.vy();
-        this->yaw_rate = kinematicState.yaw_rate();
+        auto k_state = cluon::extractMessage<opendlv::sim::KinematicState>(std::move(envelope));
+        kinematicState.vx(k_state.vx());
+        kinematicState.vy(k_state.vy());
+        kinematicState.vz(k_state.vz());
+        kinematicState.rollRate(k_state.rollRate());
+        kinematicState.pitchRate(k_state.pitchRate());
+        kinematicState.yawRate(k_state.yawRate());
 
         if (VERBOSE) {
-          std::cout << "Kinematic state with id " << FRAME_ID
-            << " is at velocity [vx=" << kinematicState.vx() 
+          std::cout << "Kinematic state : "
+            << " has velocity [vx=" << kinematicState.vx() 
             << ", vy=" << kinematicState.vy() << ", vz=" << kinematicState.vz() 
             << "] with the rotation rate [rollRate=" 
             << kinematicState.rollRate() << ", pitchRate=" 
@@ -67,30 +75,33 @@ int32_t main(int32_t argc, char **argv)
     
     // Createing the OD4 session.
     cluon::OD4Session od4{CID};
-    od4.dataTrigger(opendlv::sim::kinematicState::ID(), onKinematicState);
-
+    // od4.dataTrigger(opendlv::sim::kinematicState::ID(), onKinematicState);
+    od4.dataTrigger(opendlv_sim_kinematicState_ID, onKinematicState);
+    
     // Lambda function to run at a specified frequency.
-    auto atFrequency{[&VERBOSE, &behavior, &od4]() -> bool
+    auto atFrequency{[&VERBOSE, &od4]() -> bool
     {
       cluon::data::TimeStamp sampleTime = cluon::time::now();
+      float sampleTime_float = static_cast<float>(sampleTime.microseconds());
 
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
-      if(sampleTime >= 0.0 && sampleTime <= T1)
+      if(sampleTime_float >= 0.0 && sampleTime_float <= T1)
       {
-        axle_ang_vel_left = 0.0f;
-        axle_ang_vel_right = v0*(sampleTime/T1);
+        axle_ang_vel_left.axleAngularVelocity(0.0f);
+        axle_ang_vel_right.axleAngularVelocity(V0*(sampleTime_float/T1));
       } 
-      else if(sampleTime > T1 && sampleTime <= T2)
+      else if(sampleTime_float > T1 && sampleTime_float <= T2)
       {
-        axle_ang_vel_left = v0*((sampleTime - T1)/T2);
-        axle_ang_vel_right = v0;
+        axle_ang_vel_left.axleAngularVelocity(V0*((sampleTime_float - T1)/T2));
+        axle_ang_vel_right.axleAngularVelocity(V0);
       } 
       else
       {
-        axle_ang_vel_left = 0.0f;
-        axle_ang_vel_right = 0.0f; 
+        axle_ang_vel_left.axleAngularVelocity(0.0f);
+        axle_ang_vel_right.axleAngularVelocity(0.0f); 
       }
       od4.send(axle_ang_vel_left,  sampleTime, INPUT_ID_LEFT_WHEEL);
+      // sleep(1);
       od4.send(axle_ang_vel_right, sampleTime, INPUT_ID_RIGHT_WHEEL);
 
       return true;
