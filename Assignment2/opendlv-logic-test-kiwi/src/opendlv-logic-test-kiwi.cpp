@@ -44,14 +44,11 @@ int32_t main(int32_t argc, char **argv)
     uint16_t const CID = std::stoi(commandlineArguments["cid"]);
     float const FREQ = std::stof(commandlineArguments["freq"]);
     
-    auto onKinematicState{[&INPUT_ID](cluon::data::Envelope &&envelope) {
+    auto onKinematicState{[](cluon::data::Envelope &&envelope) {
       uint32_t const senderStamp = envelope.senderStamp();
-      if(senderStamp == INPUT_ID)
+      if(senderStamp == INPUT_ID_LEFT_WHEEL || senderStamp == INPUT_ID_RIGHT_WHEEL)
       {
         auto kinematicState = cluon::extractMessage<opendlv::sim::KinematicState>(std::move(envelope));
-        this->vx = kinematicState.vx();
-        this->vy = kinematicState.vy();
-        this->yaw_rate = kinematicState.yaw_rate();
 
         if (VERBOSE) {
           std::cout << "Kinematic state with id " << FRAME_ID
@@ -91,6 +88,7 @@ int32_t main(int32_t argc, char **argv)
         axle_ang_vel_right = 0.0f; 
       }
       od4.send(axle_ang_vel_left,  sampleTime, INPUT_ID_LEFT_WHEEL);
+      // sleep(1);
       od4.send(axle_ang_vel_right, sampleTime, INPUT_ID_RIGHT_WHEEL);
 
       return true;
