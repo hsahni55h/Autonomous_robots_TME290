@@ -21,8 +21,8 @@
 #define INPUT_ID_LEFT_WHEEL  0
 #define INPUT_ID_RIGHT_WHEEL 1
 
-#define T1 3.0f
-#define T2 10.0f
+#define T1 3000000.0f
+#define T2 10000000.0f
 
 int32_t main(int32_t argc, char **argv) 
 { 
@@ -78,16 +78,17 @@ int32_t main(int32_t argc, char **argv)
     auto atFrequency{[&VERBOSE, &od4]() -> bool
     {
       cluon::data::TimeStamp sampleTime = cluon::time::now();
+      float sampleTime_float = static_cast<float>(sampleTime.microseconds());
 
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
-      if(sampleTime >= 0.0 && sampleTime <= T1)
+      if( >= 0.0 && sampleTime_float <= T1)
       {
         axle_ang_vel_left = 0.0f;
-        axle_ang_vel_right = v0*(sampleTime/T1);
+        axle_ang_vel_right = v0*(sampleTime_float/T1);
       } 
-      else if(sampleTime > T1 && sampleTime <= T2)
+      else if(sampleTime_float > T1 && sampleTime_float <= T2)
       {
-        axle_ang_vel_left = v0*((sampleTime - T1)/T2);
+        axle_ang_vel_left = v0*((sampleTime_float - T1)/T2);
         axle_ang_vel_right = v0;
       } 
       else
