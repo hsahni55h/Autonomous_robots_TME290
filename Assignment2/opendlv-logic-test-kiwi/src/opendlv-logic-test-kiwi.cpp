@@ -83,18 +83,18 @@ int32_t main(int32_t argc, char **argv)
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
       if(sampleTime_float >= 0.0 && sampleTime_float <= T1)
       {
-        axle_ang_vel_left = 0.0f;
-        axle_ang_vel_right = v0*(sampleTime_float/T1);
+        axle_ang_vel_left.axleAngularVelocity(0.0f);
+        axle_ang_vel_right.axleAngularVelocity(v0*(sampleTime_float/T1));
       } 
       else if(sampleTime_float > T1 && sampleTime_float <= T2)
       {
-        axle_ang_vel_left = v0*((sampleTime_float - T1)/T2);
-        axle_ang_vel_right = v0;
+        axle_ang_vel_left.axleAngularVelocity(v0*((sampleTime_float - T1)/T2));
+        axle_ang_vel_right.axleAngularVelocity(v0);
       } 
       else
       {
-        axle_ang_vel_left = 0.0f;
-        axle_ang_vel_right = 0.0f; 
+        axle_ang_vel_left.axleAngularVelocity(0.0f);
+        axle_ang_vel_right.axleAngularVelocity(0.0f); 
       }
       od4.send(axle_ang_vel_left,  sampleTime, INPUT_ID_LEFT_WHEEL);
       // sleep(1);
