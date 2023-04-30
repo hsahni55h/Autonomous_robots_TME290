@@ -25,6 +25,8 @@
 #define T2 10000000.0f
 #define V0 0.5f
 
+#define opendlv_sim_kinematicState_ID 1002
+
 int32_t main(int32_t argc, char **argv) 
 { 
   int32_t retCode{0};
@@ -73,8 +75,9 @@ int32_t main(int32_t argc, char **argv)
     
     // Createing the OD4 session.
     cluon::OD4Session od4{CID};
-    od4.dataTrigger(opendlv::sim::kinematicState::ID(), onKinematicState);
-
+    // od4.dataTrigger(opendlv::sim::kinematicState::ID(), onKinematicState);
+    od4.dataTrigger(opendlv_sim_kinematicState_ID, onKinematicState);
+    
     // Lambda function to run at a specified frequency.
     auto atFrequency{[&VERBOSE, &od4]() -> bool
     {
