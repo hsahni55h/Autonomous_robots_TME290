@@ -51,12 +51,12 @@ int32_t main(int32_t argc, char **argv)
       if(senderStamp == INPUT_ID_LEFT_WHEEL || senderStamp == INPUT_ID_RIGHT_WHEEL)
       {
         auto k_state = cluon::extractMessage<opendlv::sim::KinematicState>(std::move(envelope));
-        kinematicState.vx = k_state.vx();
-        kinematicState.vy = k_state.vy();
-        kinematicState.vz = k_state.vz();
-        kinematicState.rollRate = k_state.rollRate();
-        kinematicState.pitchRate = k_state.pitchRate();
-        kinematicState.yawRate = k_state.yawRate();
+        kinematicState.vx(k_state.vx());
+        kinematicState.vy(k_state.vy());
+        kinematicState.vz(k_state.vz());
+        kinematicState.rollRate(k_state.rollRate());
+        kinematicState.pitchRate(k_state.pitchRate());
+        kinematicState.yawRate(k_state.yawRate());
 
         if (VERBOSE) {
           std::cout << "Kinematic state : "
