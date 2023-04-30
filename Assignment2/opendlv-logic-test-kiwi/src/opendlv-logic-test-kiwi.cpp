@@ -81,7 +81,7 @@ int32_t main(int32_t argc, char **argv)
       float sampleTime_float = static_cast<float>(sampleTime.microseconds());
 
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
-      if( >= 0.0 && sampleTime_float <= T1)
+      if(sampleTime_float >= 0.0 && sampleTime_float <= T1)
       {
         axle_ang_vel_left = 0.0f;
         axle_ang_vel_right = v0*(sampleTime_float/T1);
