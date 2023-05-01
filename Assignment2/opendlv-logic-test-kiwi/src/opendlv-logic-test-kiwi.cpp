@@ -88,7 +88,7 @@ int32_t main(int32_t argc, char **argv)
     // Lambda function to run at a specified frequency.
     auto atFrequency{[&VERBOSE, &od4]() -> bool
     { 
-      t = t + dt;
+      
       cout << "robot time t = " << t << endl;
 
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
@@ -114,7 +114,7 @@ int32_t main(int32_t argc, char **argv)
 
       cout << "axle_ang_vel_left = " << axle_ang_vel_left.axleAngularVelocity() << endl;
       cout << "axle_ang_vel_right = " << axle_ang_vel_right.axleAngularVelocity() << endl;
-
+      t = t + dt;
       return true;
     }};
 
