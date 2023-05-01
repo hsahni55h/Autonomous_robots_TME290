@@ -30,8 +30,8 @@ class Differential {
     volatile bool isAxleAngularVelocityLeftNew;   // to avoid repeated update on no new data
     volatile bool isAxleAngularVelocityRightNew;
     
-    float AxleAngularVelocityLeft;    // actual vales of axle velocities
-    float AxleAngularVelocityRight;
+    // float AxleAngularVelocityLeft;    // actual vales of axle velocities
+    // float AxleAngularVelocityRight;
     
     // state
     float vx;		        // m/s

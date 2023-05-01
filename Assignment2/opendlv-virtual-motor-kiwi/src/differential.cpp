@@ -30,8 +30,8 @@ Differential::Differential(const float vx0, const float vy0, const float yaw0) n
   m_AxleAngularVelocityRightMutex{},
   isAxleAngularVelocityLeftNew{false},
   isAxleAngularVelocityRightNew{false},
-  AxleAngularVelocityLeft{0.0f},
-  AxleAngularVelocityRight{0.0f},
+  vl{0.0f},
+  vr{0.0f},
   vx{vx0},
   vy{vy0},
   yaw_rate{0.0f},
@@ -46,9 +46,9 @@ void Differential::setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularV
   std::lock_guard<std::mutex> lock(m_AxleAngularVelocityLeftMutex);
 
   // TODO: ideally a queue with timestamp must be maintained
-  this->AxleAngularVelocityLeft = axle_ang_vel_left.axleAngularVelocity();
+  this->vl = axle_ang_vel_left.axleAngularVelocity();
   this->isAxleAngularVelocityLeftNew = true;    // new data flag set
-  cout << "<<=== updating this->AxleAngularVelocityLeft = " << this->AxleAngularVelocityLeft << endl;
+  cout << "<<=== updating this->vl = " << this->vl << endl;
 }
 
 void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_right) noexcept
@@ -56,9 +56,9 @@ void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngular
   std::lock_guard<std::mutex> lock(m_AxleAngularVelocityRightMutex);
 
   // TODO: ideally a queue with timestamp must be maintained
-  this->AxleAngularVelocityRight = axle_ang_vel_right.axleAngularVelocity();
+  this->vr = axle_ang_vel_right.axleAngularVelocity();
   this->isAxleAngularVelocityRightNew = true;   // new data flag set
-  cout << "<<=== updating this->AxleAngularVelocityRight = " << this->AxleAngularVelocityRight << endl;
+  cout << "<<=== updating this->vr = " << this->vr << endl;
 }
 
 opendlv::sim::KinematicState Differential::step(double dt) noexcept
@@ -72,11 +72,11 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     // std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
     // std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
     
-    cout << "*** using this->AxleAngularVelocityLeft *** " << this->AxleAngularVelocityLeft << endl;
-    cout << "*** using this->AxleAngularVelocityRight *** " << this->AxleAngularVelocityRight << endl;
+    cout << "*** using this->vl *** " << this->vl << endl;
+    cout << "*** using this->vr *** " << this->vr << endl;
     // convert axle speed to wheel speed 
-    this->vl = this->AxleAngularVelocityLeft;
-    this->vr = this->AxleAngularVelocityRight;
+    this->vl = this->vl;
+    this->vr = this->vr;
 
     // calculations for yaw_rate vx vy from lecture notes
     float v = (this->vl + this->vr) / 2.0f;
