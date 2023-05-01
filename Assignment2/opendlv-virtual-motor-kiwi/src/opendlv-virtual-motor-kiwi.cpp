@@ -47,9 +47,9 @@ int32_t main(int32_t argc, char **argv) {
     uint32_t const FRAME_ID = std::stoi(commandlineArguments["frame-id"]);
     uint32_t const INPUT_ID = (commandlineArguments.count("input-id") != 0) ?
       std::stoi(commandlineArguments["input-id"]) : 0;
-    float const TIMEMOD{(commandlineArguments["timemod"].size() != 0) 
+    float TIMEMOD{(commandlineArguments["timemod"].size() != 0) 
       ? static_cast<float>(std::stof(commandlineArguments["timemod"])) : 1.0f};
-    float const FREQ = std::stof(commandlineArguments["freq"]);
+    float FREQ = std::stof(commandlineArguments["freq"]);
     double const DT = 1.0 / FREQ;
     
     // The kinematic model is in its own class, and the object is created here.
@@ -94,6 +94,8 @@ int32_t main(int32_t argc, char **argv) {
     }};
     
     // Will run until Ctrl+C is pressed.
+    FREQ = 100.0f;
+    TIMEMOD = 1.0f;
     od4.timeTrigger(TIMEMOD * FREQ, atFrequency);
   }
   

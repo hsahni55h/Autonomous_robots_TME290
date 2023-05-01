@@ -45,7 +45,7 @@ int32_t main(int32_t argc, char **argv)
     // Extract the command line arguments.
     bool const VERBOSE{commandlineArguments.count("verbose") != 0};
     uint16_t const CID = std::stoi(commandlineArguments["cid"]);
-    float const FREQ = std::stof(commandlineArguments["freq"]);
+    float FREQ = std::stof(commandlineArguments["freq"]);
     
     opendlv::sim::KinematicState kinematicState{};
 
@@ -108,6 +108,7 @@ int32_t main(int32_t argc, char **argv)
     }};
 
     // This will block until Ctrl+C is pressed.
+    FREQ = 100.0f;
     od4.timeTrigger(FREQ, atFrequency);
   }
   
