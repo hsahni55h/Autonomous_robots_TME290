@@ -35,9 +35,9 @@ Differential::Differential(const float vx0, const float vy0, const float yaw0) n
   vx{vx0},
   vy{vy0},
   yaw_rate{0.0f},
-  yaw{yaw0},
-  vl{0.0f},
-  vr{0.0f}
+  yaw{yaw0}
+  // vl{0.0f},
+  // vr{0.0f}
 {
 }
 
