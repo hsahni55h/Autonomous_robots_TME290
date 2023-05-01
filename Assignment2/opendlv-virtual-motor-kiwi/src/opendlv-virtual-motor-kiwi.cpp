@@ -77,7 +77,7 @@ int32_t main(int32_t argc, char **argv) {
     // Lambda function to run at a specific frequency.
     auto atFrequency{[&FRAME_ID, &VERBOSE, &DT, &differential, &od4]() -> bool
     {
-      t = t + DT;
+      t = t + static_cast<float>(DT);
       opendlv::sim::KinematicState kinematicState = differential.step(DT);
 
       cluon::data::TimeStamp sampleTime = cluon::time::now();
