@@ -86,7 +86,7 @@ int32_t main(int32_t argc, char **argv)
     od4.dataTrigger(opendlv_sim_kinematicState_ID, onKinematicState);
     
     // Lambda function to run at a specified frequency.
-    auto atFrequency{[&VERBOSE, &od4, &dt]() -> bool
+    auto atFrequency{[&VERBOSE, &od4]() -> bool
     { 
       t = t + dt;
       cout << "robot time t = " << t << endl;
