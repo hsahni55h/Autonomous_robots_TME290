@@ -78,8 +78,8 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     //this->yaw = this->yaw + this->yaw_rate * static_cast<float>(dt);            // using the logic: phi(t+1) = phi(t) + phi_dot*dt
     //this->vx = v * static_cast<float>(cos(this->yaw));
     //this->vy = v * static_cast<float>(sin(this->yaw));
-    this->vx = v
-    this->vy = 0
+    this->vx = v;
+    this->vy = 0;
 
     // // new data flag clear
     isAxleAngularVelocityLeftNew = false;
