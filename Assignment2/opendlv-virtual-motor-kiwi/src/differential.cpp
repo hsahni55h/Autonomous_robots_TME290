@@ -75,8 +75,8 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     cout << "*** using this->AxleAngularVelocityLeft *** " << this->AxleAngularVelocityLeft << endl;
     cout << "*** using this->AxleAngularVelocityRight *** " << this->AxleAngularVelocityRight << endl;
     // convert axle speed to wheel speed 
-    this->vl = this->AxleAngularVelocityLeft * r;
-    this->vr = this->AxleAngularVelocityRight * r;
+    this->vl = this->AxleAngularVelocityLeft;
+    this->vr = this->AxleAngularVelocityRight;
 
     // calculations for yaw_rate vx vy from lecture notes
     float v = (this->vl + this->vr) / 2.0f;
