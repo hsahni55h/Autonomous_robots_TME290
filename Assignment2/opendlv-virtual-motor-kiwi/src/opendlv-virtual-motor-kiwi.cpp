@@ -94,8 +94,8 @@ int32_t main(int32_t argc, char **argv) {
     }};
     
     // Will run until Ctrl+C is pressed.
-    FREQ = 100.0f;
-    TIMEMOD = 1.0f;
+    // FREQ = 100.0f;
+    // TIMEMOD = 1.0f;
     od4.timeTrigger(TIMEMOD * FREQ, atFrequency);
   }
   

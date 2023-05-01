@@ -84,6 +84,8 @@ int32_t main(int32_t argc, char **argv)
       cluon::data::TimeStamp sampleTime = cluon::time::now();
       float sampleTime_float = static_cast<float>(sampleTime.microseconds());
 
+      cout << "sample float = " << sampleTime_float << endl;
+
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
       if(sampleTime_float >= 0.0 && sampleTime_float <= T1)
       {
@@ -108,7 +110,7 @@ int32_t main(int32_t argc, char **argv)
     }};
 
     // This will block until Ctrl+C is pressed.
-    FREQ = 100.0f;
+    // FREQ = 100.0f;
     od4.timeTrigger(FREQ, atFrequency);
   }
   
