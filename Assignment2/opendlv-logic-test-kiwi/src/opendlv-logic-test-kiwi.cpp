@@ -95,11 +95,11 @@ int32_t main(int32_t argc, char **argv)
       if(t >= 0.0 && t <= T1)
       {
         axle_ang_vel_left.axleAngularVelocity(0.0f);
-        axle_ang_vel_right.axleAngularVelocity(V0*(t/T1));
+        axle_ang_vel_right.axleAngularVelocity(V0*t/T1);
       } 
       else if(t > T1 && t <= T2)
       {
-        axle_ang_vel_left.axleAngularVelocity(V0*((t - T1)/T2));
+        axle_ang_vel_left.axleAngularVelocity((V0*(t - T1))/T2);
         axle_ang_vel_right.axleAngularVelocity(V0);
       } 
       else
