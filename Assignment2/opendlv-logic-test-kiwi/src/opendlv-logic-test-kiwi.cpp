@@ -112,6 +112,9 @@ int32_t main(int32_t argc, char **argv)
       od4.send(axle_ang_vel_left,  sampleTime, INPUT_ID_LEFT_WHEEL);
       od4.send(axle_ang_vel_right, sampleTime, INPUT_ID_RIGHT_WHEEL);
 
+      cout << "axle_ang_vel_left = " << axle_ang_vel_left << endl;
+      cout << "axle_ang_vel_right = " << axle_ang_vel_right << endl;
+
       return true;
     }};
 
