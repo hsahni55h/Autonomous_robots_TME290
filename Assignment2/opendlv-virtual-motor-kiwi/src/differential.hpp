@@ -32,15 +32,15 @@ class Differential {
     
     // float AxleAngularVelocityLeft;    // actual vales of axle velocities
     // float AxleAngularVelocityRight;
-    
+    volatile float vl;	// rad/s
+    volatile float vr;	// rad/s
     // state
     float vx;		        // m/s
     float vy;		        // m/s
     float yaw_rate;	    // rad/s
     float yaw;          // rad
     // input
-    volatile float vl;	// rad/s
-    volatile float vr;	// rad/s
+    
     
   public:
     Differential(const float vx0 = 0.0f, const float vy0 = 0.0f, const float yaw0 = 0.0f) noexcept;
