@@ -22,6 +22,8 @@
 #define INPUT_ID_LEFT_WHEEL  0
 #define INPUT_ID_RIGHT_WHEEL 1
 
+static float t = 0.0f;
+
 int32_t main(int32_t argc, char **argv) {
   int32_t retCode{0};
   auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
@@ -75,6 +77,7 @@ int32_t main(int32_t argc, char **argv) {
     // Lambda function to run at a specific frequency.
     auto atFrequency{[&FRAME_ID, &VERBOSE, &DT, &differential, &od4]() -> bool
     {
+      t = t + DT;
       opendlv::sim::KinematicState kinematicState = differential.step(DT);
 
       cluon::data::TimeStamp sampleTime = cluon::time::now();
@@ -82,10 +85,10 @@ int32_t main(int32_t argc, char **argv) {
 
       if (1) 
       {
-        std::cout << "Kinematic state with id " << FRAME_ID
+        std::cout << "Kinematic state at t = " << t
           << " is at velocity [vx=" << kinematicState.vx() 
-          << ", vy=" << kinematicState.vy() << "," 
-          << kinematicState.yawRate() << "]." << std::endl;
+          << ", vy=" << kinematicState.vy()
+          << ", yawRate=" << kinematicState.yawRate() << "]." << std::endl;
       }
       return true;
     }};
