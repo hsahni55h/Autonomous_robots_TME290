@@ -65,8 +65,8 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
   if(this->isAxleAngularVelocityLeftNew == true && this->isAxleAngularVelocityRightNew == true)
   {
     // acquire MUTEX
-    std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
-    std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
+    // std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
+    // std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
     
     // convert axle speed to wheel speed 
     this->vl = this->AxleAngularVelocityLeft * r;
