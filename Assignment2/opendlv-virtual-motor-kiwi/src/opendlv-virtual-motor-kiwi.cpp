@@ -80,7 +80,7 @@ int32_t main(int32_t argc, char **argv) {
       cluon::data::TimeStamp sampleTime = cluon::time::now();
       od4.send(kinematicState, sampleTime, FRAME_ID);
 
-      if (VERBOSE) 
+      if (1) 
       {
         std::cout << "Kinematic state with id " << FRAME_ID
           << " is at velocity [vx=" << kinematicState.vx() 
@@ -92,7 +92,7 @@ int32_t main(int32_t argc, char **argv) {
       }
       return true;
     }};
-    
+    (void)VERBOSE;
     // Will run until Ctrl+C is pressed.
     // FREQ = 100.0f;
     // TIMEMOD = 1.0f;
