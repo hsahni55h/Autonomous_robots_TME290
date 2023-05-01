@@ -30,6 +30,7 @@
 
 using namespace std;
 static float t = 0.0f;    // robot time
+static float dt = 0.0f;
 
 int32_t main(int32_t argc, char **argv) 
 { 
@@ -50,7 +51,7 @@ int32_t main(int32_t argc, char **argv)
     bool const VERBOSE{commandlineArguments.count("verbose") != 0};
     uint16_t const CID = std::stoi(commandlineArguments["cid"]);
     float FREQ = std::stof(commandlineArguments["freq"]);
-    float dt = 1.0f / FREQ;
+    dt = 1.0f / FREQ;
 
     opendlv::sim::KinematicState kinematicState{};
 
@@ -85,7 +86,7 @@ int32_t main(int32_t argc, char **argv)
     od4.dataTrigger(opendlv_sim_kinematicState_ID, onKinematicState);
     
     // Lambda function to run at a specified frequency.
-    auto atFrequency{[&VERBOSE, &od4]() -> bool
+    auto atFrequency{[&VERBOSE, &od4, &dt]() -> bool
     { 
       t = t + dt;
       cout << "robot time t = " << t << endl;
