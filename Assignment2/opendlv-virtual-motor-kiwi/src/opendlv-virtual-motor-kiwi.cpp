@@ -84,10 +84,7 @@ int32_t main(int32_t argc, char **argv) {
       {
         std::cout << "Kinematic state with id " << FRAME_ID
           << " is at velocity [vx=" << kinematicState.vx() 
-          << ", vy=" << kinematicState.vy() << ", vz=" << kinematicState.vz() 
-          << "] with the rotation rate [rollRate=" 
-          << kinematicState.rollRate() << ", pitchRate=" 
-          << kinematicState.pitchRate() << ", yawRate=" 
+          << ", vy=" << kinematicState.vy() << "," 
           << kinematicState.yawRate() << "]." << std::endl;
       }
       return true;
