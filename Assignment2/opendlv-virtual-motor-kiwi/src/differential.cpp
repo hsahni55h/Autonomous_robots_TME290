@@ -45,7 +45,7 @@ void Differential::setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularV
 
   // TODO: ideally a queue with timestamp must be maintained
   this->AxleAngularVelocityLeft = axle_ang_vel_left.axleAngularVelocity();
-  isAxleAngularVelocityLeftNew = true;    // new data flag set
+  this->isAxleAngularVelocityLeftNew = true;    // new data flag set
 }
 
 void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_right) noexcept
@@ -54,7 +54,7 @@ void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngular
 
   // TODO: ideally a queue with timestamp must be maintained
   this->AxleAngularVelocityRight = axle_ang_vel_right.axleAngularVelocity();
-  isAxleAngularVelocityRightNew = true;   // new data flag set
+  this->isAxleAngularVelocityRightNew = true;   // new data flag set
 }
 
 opendlv::sim::KinematicState Differential::step(double dt) noexcept
@@ -62,7 +62,7 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
   opendlv::sim::KinematicState k_state;   // default
   
   // if we have new data the update else state = prev_state
-  if(isAxleAngularVelocityLeftNew && isAxleAngularVelocityRightNew)
+  if(this->isAxleAngularVelocityLeftNew == true && this->isAxleAngularVelocityRightNew == true)
   {
     // acquire MUTEX
     std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
@@ -79,8 +79,8 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     this->vy = 0.0f;
 
     // // new data flag clear
-    isAxleAngularVelocityLeftNew = false;
-    isAxleAngularVelocityRightNew = false;
+    this->isAxleAngularVelocityLeftNew = false;
+    this->isAxleAngularVelocityRightNew = false;
 
     (void)dt;
   }
