@@ -22,9 +22,9 @@
 #define INPUT_ID_LEFT_WHEEL  0
 #define INPUT_ID_RIGHT_WHEEL 1
 
-#define T1 3000000.0f
-#define T2 10000000.0f
-#define V0 0.5f
+#define T1 3.0f     // seconds
+#define T2 10.0f    // seconds
+#define V0 0.5f     // m/s
 
 #define opendlv_sim_kinematicState_ID 1002
 
