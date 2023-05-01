@@ -84,6 +84,8 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     // // new data flag clear
     isAxleAngularVelocityLeftNew = false;
     isAxleAngularVelocityRightNew = false;
+
+    (void)dt;
   }
   
   // compute kinematic state    
