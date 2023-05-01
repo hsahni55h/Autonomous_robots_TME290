@@ -20,6 +20,8 @@
 
 #include "differential.hpp"
 
+using namespace std;
+
 #define R (0.12f)    // radius of the robot (in m)
 #define r (0.04f)    // radius of the wheel (in m)
 
@@ -46,6 +48,7 @@ void Differential::setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularV
   // TODO: ideally a queue with timestamp must be maintained
   this->AxleAngularVelocityLeft = axle_ang_vel_left.axleAngularVelocity();
   this->isAxleAngularVelocityLeftNew = true;    // new data flag set
+  cout << "<<=== updating this->AxleAngularVelocityLeft = " << this->AxleAngularVelocityLeft << endl;
 }
 
 void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_right) noexcept
@@ -55,6 +58,7 @@ void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngular
   // TODO: ideally a queue with timestamp must be maintained
   this->AxleAngularVelocityRight = axle_ang_vel_right.axleAngularVelocity();
   this->isAxleAngularVelocityRightNew = true;   // new data flag set
+  cout << "<<=== updating this->AxleAngularVelocityRight = " << this->AxleAngularVelocityRight << endl;
 }
 
 opendlv::sim::KinematicState Differential::step(double dt) noexcept
@@ -68,6 +72,8 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
     // std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
     // std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
     
+    cout << "*** using this->AxleAngularVelocityLeft *** " << this->AxleAngularVelocityLeft << endl;
+    cout << "*** using this->AxleAngularVelocityRight *** " << this->AxleAngularVelocityRight << endl;
     // convert axle speed to wheel speed 
     this->vl = this->AxleAngularVelocityLeft * r;
     this->vr = this->AxleAngularVelocityRight * r;
