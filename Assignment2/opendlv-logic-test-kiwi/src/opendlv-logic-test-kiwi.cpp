@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
 
@@ -26,6 +27,8 @@
 #define V0 0.5f
 
 #define opendlv_sim_kinematicState_ID 1002
+
+using namespace std;
 
 int32_t main(int32_t argc, char **argv) 
 { 
@@ -61,6 +64,7 @@ int32_t main(int32_t argc, char **argv)
         kinematicState.pitchRate(k_state.pitchRate());
         kinematicState.yawRate(k_state.yawRate());
 
+
         if (VERBOSE) {
           std::cout << "Kinematic state : "
             << " has velocity [vx=" << kinematicState.vx() 
@@ -83,7 +87,6 @@ int32_t main(int32_t argc, char **argv)
     {
       cluon::data::TimeStamp sampleTime = cluon::time::now();
       float sampleTime_float = static_cast<float>(sampleTime.microseconds());
-
       cout << "sample float = " << sampleTime_float << endl;
 
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
