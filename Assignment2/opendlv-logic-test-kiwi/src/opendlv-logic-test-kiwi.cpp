@@ -15,17 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
 
 #define INPUT_ID_LEFT_WHEEL  0
 #define INPUT_ID_RIGHT_WHEEL 1
 
-#define T1 3000000.0f
-#define T2 10000000.0f
-#define V0 0.5f
+#define T1 3.0f     // seconds
+#define T2 10.0f    // seconds
+#define V0 0.5f     // m/s
 
 #define opendlv_sim_kinematicState_ID 1002
+
+using namespace std;
+static float t = 0.0f;    // robot time
+static float dt = 0.0f;
 
 int32_t main(int32_t argc, char **argv) 
 { 
@@ -45,8 +50,9 @@ int32_t main(int32_t argc, char **argv)
     // Extract the command line arguments.
     bool const VERBOSE{commandlineArguments.count("verbose") != 0};
     uint16_t const CID = std::stoi(commandlineArguments["cid"]);
-    float const FREQ = std::stof(commandlineArguments["freq"]);
-    
+    float FREQ = std::stof(commandlineArguments["freq"]);
+    dt = 1.0f / FREQ;
+
     opendlv::sim::KinematicState kinematicState{};
 
     auto onKinematicState{[&VERBOSE, &kinematicState](cluon::data::Envelope &&envelope) {
@@ -60,6 +66,7 @@ int32_t main(int32_t argc, char **argv)
         kinematicState.rollRate(k_state.rollRate());
         kinematicState.pitchRate(k_state.pitchRate());
         kinematicState.yawRate(k_state.yawRate());
+
 
         if (VERBOSE) {
           std::cout << "Kinematic state : "
@@ -80,29 +87,33 @@ int32_t main(int32_t argc, char **argv)
     
     // Lambda function to run at a specified frequency.
     auto atFrequency{[&VERBOSE, &od4]() -> bool
-    {
-      cluon::data::TimeStamp sampleTime = cluon::time::now();
-      float sampleTime_float = static_cast<float>(sampleTime.microseconds());
+    { 
+      t = t + dt;
+      cout << "robot time t = " << t << endl;
 
       opendlv::proxy::AxleAngularVelocityRequest axle_ang_vel_left, axle_ang_vel_right;
-      if(sampleTime_float >= 0.0 && sampleTime_float <= T1)
+      if(t >= 0.0 && t <= T1)
       {
         axle_ang_vel_left.axleAngularVelocity(0.0f);
-        axle_ang_vel_right.axleAngularVelocity(V0*(sampleTime_float/T1));
+        axle_ang_vel_right.axleAngularVelocity(V0*t/T1);
       } 
-      else if(sampleTime_float > T1 && sampleTime_float <= T2)
+      else if(t > T1 && t <= T2)
       {
-        axle_ang_vel_left.axleAngularVelocity(V0*((sampleTime_float - T1)/T2));
+        axle_ang_vel_left.axleAngularVelocity((V0*(t - T1))/T2);
         axle_ang_vel_right.axleAngularVelocity(V0);
       } 
       else
       {
         axle_ang_vel_left.axleAngularVelocity(0.0f);
-        axle_ang_vel_right.axleAngularVelocity(0.0f); 
+        axle_ang_vel_right.axleAngularVelocity(0.0f);
       }
+      
+      cluon::data::TimeStamp sampleTime = cluon::time::now();
       od4.send(axle_ang_vel_left,  sampleTime, INPUT_ID_LEFT_WHEEL);
-      // sleep(1);
       od4.send(axle_ang_vel_right, sampleTime, INPUT_ID_RIGHT_WHEEL);
+
+      cout << "axle_ang_vel_left = " << axle_ang_vel_left.axleAngularVelocity() << endl;
+      cout << "axle_ang_vel_right = " << axle_ang_vel_right.axleAngularVelocity() << endl;
 
       return true;
     }};

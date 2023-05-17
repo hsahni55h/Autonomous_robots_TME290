@@ -22,6 +22,8 @@
 #define INPUT_ID_LEFT_WHEEL  0
 #define INPUT_ID_RIGHT_WHEEL 1
 
+static float t = 0.0f;
+
 int32_t main(int32_t argc, char **argv) {
   int32_t retCode{0};
   auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
@@ -47,9 +49,9 @@ int32_t main(int32_t argc, char **argv) {
     uint32_t const FRAME_ID = std::stoi(commandlineArguments["frame-id"]);
     uint32_t const INPUT_ID = (commandlineArguments.count("input-id") != 0) ?
       std::stoi(commandlineArguments["input-id"]) : 0;
-    float const TIMEMOD{(commandlineArguments["timemod"].size() != 0) 
+    float TIMEMOD{(commandlineArguments["timemod"].size() != 0) 
       ? static_cast<float>(std::stof(commandlineArguments["timemod"])) : 1.0f};
-    float const FREQ = std::stof(commandlineArguments["freq"]);
+    float FREQ = std::stof(commandlineArguments["freq"]);
     double const DT = 1.0 / FREQ;
     
     // The kinematic model is in its own class, and the object is created here.
@@ -75,25 +77,25 @@ int32_t main(int32_t argc, char **argv) {
     // Lambda function to run at a specific frequency.
     auto atFrequency{[&FRAME_ID, &VERBOSE, &DT, &differential, &od4]() -> bool
     {
+      t = t + static_cast<float>(DT);
       opendlv::sim::KinematicState kinematicState = differential.step(DT);
 
       cluon::data::TimeStamp sampleTime = cluon::time::now();
       od4.send(kinematicState, sampleTime, FRAME_ID);
 
-      if (VERBOSE) 
+      if (1) 
       {
-        std::cout << "Kinematic state with id " << FRAME_ID
+        std::cout << "Kinematic state at t = " << t
           << " is at velocity [vx=" << kinematicState.vx() 
-          << ", vy=" << kinematicState.vy() << ", vz=" << kinematicState.vz() 
-          << "] with the rotation rate [rollRate=" 
-          << kinematicState.rollRate() << ", pitchRate=" 
-          << kinematicState.pitchRate() << ", yawRate=" 
-          << kinematicState.yawRate() << "]." << std::endl;
+          << ", vy=" << kinematicState.vy()
+          << ", yawRate=" << kinematicState.yawRate() << "]." << std::endl;
       }
       return true;
     }};
-    
+    (void)VERBOSE;
     // Will run until Ctrl+C is pressed.
+    // FREQ = 100.0f;
+    // TIMEMOD = 1.0f;
     od4.timeTrigger(TIMEMOD * FREQ, atFrequency);
   }
   

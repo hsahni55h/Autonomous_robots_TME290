@@ -20,6 +20,8 @@
 
 #include "differential.hpp"
 
+using namespace std;
+
 #define R (0.12f)    // radius of the robot (in m)
 #define r (0.04f)    // radius of the wheel (in m)
 
@@ -45,7 +47,8 @@ void Differential::setAxleAngularVelocityLeft(const opendlv::proxy::AxleAngularV
 
   // TODO: ideally a queue with timestamp must be maintained
   this->AxleAngularVelocityLeft = axle_ang_vel_left.axleAngularVelocity();
-  isAxleAngularVelocityLeftNew = true;    // new data flag set
+  this->isAxleAngularVelocityLeftNew = true;    // new data flag set
+  cout << "<<=== updating this->AxleAngularVelocityLeft = " << this->AxleAngularVelocityLeft << endl;
 }
 
 void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngularVelocityRequest& axle_ang_vel_right) noexcept
@@ -54,7 +57,8 @@ void Differential::setAxleAngularVelocityRight(const opendlv::proxy::AxleAngular
 
   // TODO: ideally a queue with timestamp must be maintained
   this->AxleAngularVelocityRight = axle_ang_vel_right.axleAngularVelocity();
-  isAxleAngularVelocityRightNew = true;   // new data flag set
+  this->isAxleAngularVelocityRightNew = true;   // new data flag set
+  cout << "<<=== updating this->AxleAngularVelocityRight = " << this->AxleAngularVelocityRight << endl;
 }
 
 opendlv::sim::KinematicState Differential::step(double dt) noexcept
@@ -62,26 +66,29 @@ opendlv::sim::KinematicState Differential::step(double dt) noexcept
   opendlv::sim::KinematicState k_state;   // default
   
   // if we have new data the update else state = prev_state
-  if(isAxleAngularVelocityLeftNew && isAxleAngularVelocityRightNew)
+  if(this->isAxleAngularVelocityLeftNew == true && this->isAxleAngularVelocityRightNew == true)
   {
     // acquire MUTEX
-    std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
-    std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
+    // std::lock_guard<std::mutex> lock1(m_AxleAngularVelocityLeftMutex);
+    // std::lock_guard<std::mutex> lock2(m_AxleAngularVelocityRightMutex);
     
+    cout << "*** using this->AxleAngularVelocityLeft *** " << this->AxleAngularVelocityLeft << endl;
+    cout << "*** using this->AxleAngularVelocityRight *** " << this->AxleAngularVelocityRight << endl;
     // convert axle speed to wheel speed 
-    this->vl = this->AxleAngularVelocityLeft * R;
-    this->vr = this->AxleAngularVelocityRight * R;
+    this->vl = this->AxleAngularVelocityLeft;
+    this->vr = this->AxleAngularVelocityRight;
 
     // calculations for yaw_rate vx vy from lecture notes
     float v = (this->vl + this->vr) / 2.0f;
     this->yaw_rate = (this->vr - this->vl) / (2*R);    // phi_dot
-    this->yaw = this->yaw + this->yaw_rate * static_cast<float>(dt);            // using the logic: phi(t+1) = phi(t) + phi_dot*dt
-    this->vx = v * static_cast<float>(cos(this->yaw));
-    this->vy = v * static_cast<float>(sin(this->yaw));
+    this->vx = v;
+    this->vy = 0.0f;
 
     // // new data flag clear
-    isAxleAngularVelocityLeftNew = false;
-    isAxleAngularVelocityRightNew = false;
+    this->isAxleAngularVelocityLeftNew = false;
+    this->isAxleAngularVelocityRightNew = false;
+
+    (void)dt;
   }
   
   // compute kinematic state    
