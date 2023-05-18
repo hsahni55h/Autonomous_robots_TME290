@@ -1,119 +1,80 @@
 #include "kalman.hpp"
 
-
-using namespace std;
-using namespace Eigen;
-
-Kalman::Kalman(const KalmanConfig_t& config) //: 
-    // F(config.F), 
-    // H(config.H), 
-    // Q(config.Q), 
-    // R(config.R), 
-    // I(config.I),
-    // n(config.n),
-    // m(config.m),
-    // k(0),
-    // kmax(config.kmax)
-{    
-
-//     x.push_back(config.x0);
-//     P.push_back(config.P0);
-    
-//     MatrixXd z0(m, 1);
-//     z0.setZero();
-//     z.push_back(z0);
-
+Kalman::Kalman(const uint8_t n, const uint8_t m, MatrixXd& x0, MatrixXd& P0) : 
+    n(n), 
+    m(m),
+    k(0)
+{
+    x.push_back(x0);
+    P.push_back(P0);
 }
-
-// Kalman::Kalman(const KalmanConfig_t& config)
-// {
-// }
 
 Kalman::~Kalman()
 {
+
 }
 
-
-bool Kalman::predict()
+bool Kalman::predict(MatrixXd& F, MatrixXd& Q)
 {
-    // MatrixXd xp(n, 1);
-    // xp << F * x.at(k);
-    // x.push_back(xp);                        // prediction state mean 
+    MatrixXd xp(n, 1);
+    MatrixXd Pp(n, n);
 
-    // MatrixXd Pp(n, n);
-    // Pp = F * P.at(k) * F.transpose() + Q;
-    // P.push_back(Pp);                          // prediction state covariance
+    xp << F * x.at(k);
+    Pp << (F * P.at(k) * F.transpose()) + Q;
+    k++;
 
-    // k++;
-    return true;
-}
-
-bool Kalman::update(MatrixXd z_in)
-{
-    // MatrixXd y(m, 1);
-    // MatrixXd S(m, m);
-    // MatrixXd K(n, m);
-
-    // y << z_in - (H * x.at(k));                         // residual
-    // S << H * P.at(k) * H.transpose() + R;
-    // K << P.at(k) * H.transpose() * S.inverse();     // Kalman gain
+    x.push_back(xp);
+    P.push_back(Pp);
     
-    // x.at(k) = x.at(k) + K * y;                      // updated state mean
-    // P.at(k) = (I - (K * H)) * P.at(k);              // updated state covariance
-
     return true;
 }
 
-// bool Kalman::step(MatrixXd z_in)
-// {
-//     predict();
-//     update(z_in);
-//     return true;
-// }
+bool Kalman::update(MatrixXd& H, MatrixXd& R, MatrixXd& z)
+{
+    MatrixXd xm(n, 1);
+    MatrixXd Pm(n, n);
+
+    MatrixXd y(m, 1);
+    MatrixXd S(m, m);
+    MatrixXd K(n, m);
+
+    y << z - (H * x.at(k));
+    S << (H * P.at(k) * H.transpose()) + R;
+    K << P.at(k) * H.transpose() * S.inverse();
+    
+    xm << x.at(k) + (K * y);
+    Pm << P.at(k) - (K * H * P.at(k));
+
+    x.at(k) << xm;
+    P.at(k) << Pm;
+    return true;
+}
+
+bool Kalman::step(MatrixXd& F, MatrixXd& Q, MatrixXd& H, MatrixXd& R, MatrixXd& z)
+{
+    return predict(F, Q) && update(H, R, z);
+}
 
 
-// bool Kalman::run(vector<MatrixXd> z_arr)
-// {
-//     for(auto zk : z_arr) 
-//     {
-//         predict();
-//         update(zk);
-//     }
-//     return true;
-// }
+bool Kalman::get_state_mean_at(const uint32_t k_in, MatrixXd& x_out) const
+{
+    if(k_in > k)
+    {
+        return false;
+    }
+    x_out.resize(n, 1);
+    x_out << x.at(k_in);
+    return true;
+}
 
-
-// MatrixXd Kalman::get_current_state_mean() const
-// {
-//     return x.at(k);
-// }
-
-// MatrixXd Kalman::get_current_state_covar() const
-// {
-//     return P.at(k);
-// }            
-
-
-// MatrixXd Kalman::get_state_mean_at(const uint32_t k_in) const
-// {
-//     return x.at(k_in);
-// }
-
-// MatrixXd Kalman::get_state_covar_at(const uint32_t k_in) const
-// {
-//     return P.at(k_in);
-// }
-
-
-// const vector<MatrixXd>& Kalman::get_all_state_means(uint32_t* k_curr) const
-// {
-//     *k_curr = k;
-//     return x;
-// }
-
-// const vector<MatrixXd>& Kalman::get_all_state_covars(uint32_t* k_curr) const
-// {
-//     *k_curr = k;
-//     return P;
-// }
+bool Kalman::get_state_covar_at(const uint32_t k_in, MatrixXd& P_out) const
+{
+    if(k_in > k)
+    {
+        return false;
+    }
+    P_out.resize(n, n);
+    P_out << P.at(k_in);
+    return true;
+}
 

@@ -8,17 +8,17 @@ using namespace std;
 #define F_MATRIX    1, DT, \
                     0, 1
 
-#define Q_MATRIX    0, 0, \
-                    0, 0
+#define Q_MATRIX    2, 0, \
+                    0, 2
 
 #define H_MATRIX    1, 0
 
-#define R_MATRIX    2
+#define R_MATRIX    0
 
 int main(void)
 {
-    uint8_t n = 2;
-    uint8_t m = 1;
+    uint8_t n = 2;      // NUMBER OF STATES     - REF. KALMAN CLASS
+    uint8_t m = 1;      // NUMBER OF SENSORS    - REF. KALMAN CLASS
 
     MatrixXd x0(n, 1);
     // x0.setZero();
