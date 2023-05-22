@@ -2,7 +2,7 @@
 
 CFLAGS = -std=c++17 -Wall -Werror -Wfatal-errors -g3 -I"./Eigen/"
 
-SRC = kalman.cpp
+SRC = kalman.cpp csv.cpp
 
 all: build
 
