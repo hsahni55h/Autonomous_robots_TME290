@@ -58,7 +58,7 @@ double battery_level(tme290::grass::Sensors& msg);
 void charging_battery(tme290::grass::Sensors& msg, tme290::grass::Control& control); 
 
 void cutting_grass(tme290::grass::Sensors& msg, tme290::grass::Control& control); 
-void home_position(tme290::grass::Sensors& msg, tme290::grass::Control& control); 
+void go_home(tme290::grass::Sensors& msg, tme290::grass::Control& control); 
 
 int32_t main(int32_t argc, char **argv) 
 {
@@ -296,7 +296,7 @@ void cutting_grass(tme290::grass::Sensors& msg, tme290::grass::Control& control)
   }
 }
 
-void home_position(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
+void go_home(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
 {
   uint32_t x{msg.i()};
   uint32_t y{msg.j()};
