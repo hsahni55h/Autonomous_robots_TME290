@@ -32,6 +32,8 @@ using namespace tme290::grass;
 #define WALL_LENGTH   (22)
 #define WALL_WIDTH    (17)
 
+#define within_boundary control.command(0)
+
 bool record_position{true};
 bool home_position{false};
 bool move_right{true};
@@ -47,200 +49,21 @@ const double rain_threshold{0.4};
 string filename_hourly_average{"hourly_average_data"};
 string filename_battery{"battery_data"};
 
-void initCSVFile(string& fileName) 
-{
-  auto now = chrono::system_clock::now();
-  time_t currentTime = chrono::system_clock::to_time_t(now);
+void generate_csv_file(string& fileName);
+void add_data_csv(const string& line, const string& fileName);
 
-  stringstream ss;
-  ss << put_time(gmtime(&currentTime), "%m-%d_%H-%M");
+double battery_level(Sensors& msg);
+void charging_battery(Sensors& msg, Control& control);
 
-  fileName = "data/" + fileName + "_" + ss.str() + ".csv";
-	return;
-}
+void cutting_grass(Sensors& msg, Control& control);
+void home_position(Sensors& msg, Control& control);
 
-void appendToCSV(const string& line, const string& fileName) 
-{
-  ofstream file(fileName, ios_base::app);
-
-  if (!file.is_open()) {
-    file.open(fileName);
-    file.close();
-
-    file.open(fileName, ios_base::app);
-  }
-
-  if (file) {
-    file << line << '\n';
-    file.close();
-  }
-}
-
-double getBatteryLimit(Sensors& msg) 
-{
-  uint32_t x{msg.i()}; 
-  uint32_t y{msg.j()};
-  int32_t distX{0};
-  int32_t distY{0};
-  double distance{0};
-
-  if (y < WALL_WIDTH) {
-    distance = sqrt(pow(x, 2) + pow(y, 2));
-  } else {
-    distX = abs(x - WALL_LENGTH);
-    distY = abs(y - WALL_WIDTH);
-    distance = sqrt(pow(distX, 2) + pow(distY, 2));
-    distance += sqrt(pow(WALL_LENGTH, 2) + pow(WALL_WIDTH, 2));
-  }
-
-  return distance*0.005;
-}
-
-void cutGrass(Sensors& msg, Control& control) 
-{
-  uint32_t x{msg.i()}; 
-  uint32_t y{msg.j()};
-
-  if (x == 39 && y == 39) {
-    position_x = 23;
-    position_y = 18;
-    record_position = false;
-    return_charging_dock = true;
-    move_right = true;
-    return;
-  } else if (x == 39 && y == 18) {
-    position_x = 0;
-    position_y = 0;
-    record_position = false;
-    return_charging_dock = true;
-    move_right = true;
-    return;
-  } 
-
-  if (move_right) {
-    if (x < 39) {
-      control.command(4);
-    } else {
-      move_right = false;
-      control.command(6);
-    }
-  } else {
-    if (x == 0) {
-      move_right = true;
-      control.command(6);
-    } else if (y == WALL_WIDTH && x == WALL_LENGTH) {
-      control.command(6);
-    } else {
-      control.command(8);
-    }
-  }
-}
-
-void stayInCell(Control& control) 
-{
-  control.command(0);
-}
-
-void chargeRobot(Sensors& msg, Control& control) 
-{
-  uint32_t x{msg.i()}; 
-  uint32_t y{msg.j()};
-
-  charge_battery = x != 0 && y != 0;
-
-  if (record_position) {
-    position_x = x;
-    position_y = y;
-    record_position = false;
-  }
-  if (x == 0 && y == 0 && !charge_level) {
-      string line{to_string(msg.time()) + "," +
-                       to_string(msg.battery())};
-      appendToCSV(line, filename_battery);
-  }
-
-  if (x == 0 && y == 0 && msg.battery() < 1.0) {
-    charge_level = true;
-    return_charging_dock = false;
-    control.command(0);
-  } else if (msg.battery() >= 1.0) {
-    charge_level = false;
-    record_position = true;
-    home_position = true;
-  } else if (y < WALL_WIDTH ) {
-    if (y == 0) {
-      control.command(8);
-    } else if (x == 0) {
-      control.command(2);
-    } else {
-      control.command(1);
-    }
-  } else {
-    if (x > WALL_LENGTH) {
-      control.command(1);
-    } else if (x == WALL_LENGTH) {
-      control.command(2);
-    } else  {
-      if (y == 18) {
-        control.command(4);
-      } else {
-        control.command(3);
-      }
-    }
-  }
-}
-
-void returnToPosition(Sensors& msg, Control& control) 
-{
-  uint32_t x{msg.i()};
-  uint32_t y{msg.j()};
-
-  if (x == position_x && y == position_y) {
-    home_position = false;
-    return;
-  }
-  
-  if (position_y < WALL_WIDTH) {
-    if (x == position_x) {
-      control.command(6);
-    } else if (y == position_y) {
-      control.command(4);
-    } else {
-      control.command(5);
-    }
-  } else {
-    if (x < WALL_LENGTH && y < 16) {
-        control.command(5);
-      } else if (x < WALL_LENGTH && y == 16) {
-        control.command(4);
-      }
-    else if (position_x >= WALL_LENGTH) {
-      if (x == position_x) {
-        control.command(6);
-      } else if (y == position_y) {
-        control.command(4);
-      } else {
-        control.command(5);
-      }
-    } else {
-      if (y < 18) {
-        control.command(6);
-      } else if (y == position_y) {
-        control.command(8);
-      } else if (x == position_x) {
-        control.command(6);
-      } else {
-        control.command(7);
-      }
-    }
-  }
-}
 
 int32_t main(int32_t argc, char **argv) 
 {
   int32_t retCode{0};
   auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
-  if (0 == commandlineArguments.count("cid")) {
+  if(0 == commandlineArguments.count("cid")) {
     cerr << argv[0] 
       << " is a lawn mower control algorithm." << endl;
     cerr << "Usage:   " << argv[0] << " --cid=<OpenDLV session>" 
@@ -253,36 +76,35 @@ int32_t main(int32_t argc, char **argv)
     
     cluon::OD4Session od4{cid};
 
-		int32_t timeStep{0};		// TODO: some variable initializations
 		double batteryLimit{0};
+		int32_t timeStep{0};
 
-		// TODO: some CSV operations here...
-		initCSVFile(filename_hourly_average);
-		initCSVFile(filename_battery);
+		generate_csv_file(filename_hourly_average);
+		generate_csv_file(filename_battery);
 
     auto onSensors{[&od4, &timeStep, &batteryLimit](cluon::data::Envelope &&envelope)
       {
         auto msg = cluon::extractMessage<Sensors>(
             move(envelope));
-        timeStep++;		// TODO: replace some variable
+        timeStep++;
 
         Control control;
 
-				batteryLimit = getBatteryLimit(msg);
+				batteryLimit = battery_level(msg);
 
-        if (msg.battery() < batteryLimit || (msg.rain() >= rain_threshold && !home_position && msg.i() + msg.j() != 0)) {
+        if(msg.battery() < batteryLimit || (msg.rain() >= rain_threshold && !home_position && msg.i() + msg.j() != 0)) {
           return_charging_dock = true;
         } 
         
-        if ((return_charging_dock && !charge_level) || charge_battery || charge_level) {
-          chargeRobot(msg, control);
-        } else if (home_position){
-          returnToPosition(msg, control);
+        if((return_charging_dock && !charge_level) || charge_battery || charge_level) {
+          charging_battery(msg, control);
+        } else if(home_position){
+          home_position(msg, control);
         } else {
-          if (timeStep % 2 == 0) {
-            stayInCell(control);
+          if(timeStep % 2 == 0) {
+            within_boundary(control);
           } else {
-            cutGrass(msg, control);
+            cutting_grass(msg, control);
           }
         }
 
@@ -290,8 +112,7 @@ int32_t main(int32_t argc, char **argv)
          msg.rainCloudDirX() << ", " << msg.rainCloudDirY() << ")" << endl; 
 
         od4.send(control);
-				// TODO: some stop message
-				if (msg.time() == 288000) {
+				if(msg.time() == 288000) {
           stop_execution = true;
         }
       }};
@@ -300,16 +121,15 @@ int32_t main(int32_t argc, char **argv)
       {
         auto msg = cluon::extractMessage<Status>(
             move(envelope));
-        if (verbose) {
+        if(verbose) {
           cout  << "Status at time " << msg.time() << ": " 
             << msg.grassMean() << "/" << msg.grassMax() << endl;
         }
 
-				// TODO: some CSV thing
-				if (msg.time() % 60 == 0) {
+				if(msg.time() % 60 == 0) {
           string line{to_string(msg.time() / 60) + "," +
                            to_string(msg.grassMean())};
-          appendToCSV(line, filename_hourly_average);
+          add_data_csv(line, filename_hourly_average);
         }
 
       }};
@@ -317,7 +137,7 @@ int32_t main(int32_t argc, char **argv)
     od4.dataTrigger(Sensors::ID(), onSensors);
     od4.dataTrigger(Status::ID(), onStatus);
 
-    if (verbose) {
+    if(verbose) {
       cout << "All systems ready, let's cut some grass!" << endl;
     }
 
@@ -325,13 +145,199 @@ int32_t main(int32_t argc, char **argv)
     control.command(0);
     od4.send(control);
 
-		// TODO: some minor stuff in while
-    while (od4.isRunning() && !stop_execution) {
+		while (od4.isRunning() && !stop_execution) {
       this_thread::sleep_for(chrono::milliseconds(1000));
     }
 
     retCode = 0;
   }
   return retCode;
+}
+
+
+void generate_csv_file(string& fileName) 
+{
+  auto tick = chrono::system_clock::now();
+  time_t time = chrono::system_clock::to_time_t(tick);
+
+  stringstream ss;
+  ss << put_time(gmtime(&time), "%m-%d_%H-%M");
+
+  fileName = "data/" + fileName + "_" + ss.str() + ".csv";
+	return;
+}
+
+void add_data_csv(const string& line, const string& fileName) 
+{
+  ofstream file(fileName, ios_base::app);
+
+  if(!file.is_open()) {
+    file.open(fileName);
+    file.close();
+
+    file.open(fileName, ios_base::app);
+  }
+
+  if(file) {
+    file << line << '\n';
+    file.close();
+  }
+}
+
+
+double battery_level(Sensors& msg) 
+{
+  uint32_t x{msg.i()}; 
+  uint32_t y{msg.j()};
+  int32_t distX{0};
+  int32_t distY{0};
+  double distance{0};
+
+  if(y < WALL_WIDTH) {
+    distance = sqrt(pow(x, 2) + pow(y, 2));
+  } else {
+    distX = abs(x - WALL_LENGTH);
+    distY = abs(y - WALL_WIDTH);
+    distance = sqrt(pow(distX, 2) + pow(distY, 2));
+    distance += sqrt(pow(WALL_LENGTH, 2) + pow(WALL_WIDTH, 2));
+  }
+
+  return distance*0.005;
+}
+
+void charging_battery(Sensors& msg, Control& control)
+{
+  uint32_t x{msg.i()}; 
+  uint32_t y{msg.j()};
+
+  charge_battery = x != 0 && y != 0;
+
+  if(record_position) {
+    position_x = x;
+    position_y = y;
+    record_position = false;
+  }
+  if(x == 0 && y == 0 && !charge_level) {
+      string line{to_string(msg.time()) + "," +
+                  to_string(msg.battery())};
+      add_data_csv(line, filename_battery);
+  }
+
+  if(x == 0 && y == 0 && msg.battery() < 1.0) {
+    charge_level = true;
+    return_charging_dock = false;
+    control.command(0);
+  } else if(msg.battery() >= 1.0) {
+    charge_level = false;
+    record_position = true;
+    home_position = true;
+  } else if(y < WALL_WIDTH ) {
+    if(y == 0) {
+      control.command(8);
+    } else if(x == 0) {
+      control.command(2);
+    } else {
+      control.command(1);
+    }
+  } else {
+    if(x > WALL_LENGTH) {
+      control.command(1);
+    } else if(x == WALL_LENGTH) {
+      control.command(2);
+    } else  {
+      if(y == 18) {
+        control.command(4);
+      } else {
+        control.command(3);
+      }
+    }
+  }
+}
+
+
+void cutting_grass(Sensors& msg, Control& control) 
+{
+  uint32_t x{msg.i()}; 
+  uint32_t y{msg.j()};
+
+  if(x == 39 && y == 39) {
+    position_x = 23;
+    position_y = 18;
+    record_position = false;
+    return_charging_dock = true;
+    move_right = true;
+    return;
+  } else if(x == 39 && y == 18) {
+    position_x = 0;
+    position_y = 0;
+    record_position = false;
+    return_charging_dock = true;
+    move_right = true;
+    return;
+  } 
+
+  if(move_right) {
+    if(x < 39) {
+      control.command(4);
+    } else {
+      move_right = false;
+      control.command(6);
+    }
+  } else {
+    if(x == 0) {
+      move_right = true;
+      control.command(6);
+    } else if(y == WALL_WIDTH && x == WALL_LENGTH) {
+      control.command(6);
+    } else {
+      control.command(8);
+    }
+  }
+}
+
+void home_position(Sensors& msg, Control& control) 
+{
+  uint32_t x{msg.i()};
+  uint32_t y{msg.j()};
+
+  if(x == position_x && y == position_y) {
+    home_position = false;
+    return;
+  }
+  
+  if(position_y < WALL_WIDTH) {
+    if(x == position_x) {
+      control.command(6);
+    } else if(y == position_y) {
+      control.command(4);
+    } else {
+      control.command(5);
+    }
+  } else {
+    if(x < WALL_LENGTH && y < 16) {
+        control.command(5);
+      } else if(x < WALL_LENGTH && y == 16) {
+        control.command(4);
+      }
+    else if(position_x >= WALL_LENGTH) {
+      if(x == position_x) {
+        control.command(6);
+      } else if(y == position_y) {
+        control.command(4);
+      } else {
+        control.command(5);
+      }
+    } else {
+      if(y < 18) {
+        control.command(6);
+      } else if(y == position_y) {
+        control.command(8);
+      } else if(x == position_x) {
+        control.command(6);
+      } else {
+        control.command(7);
+      }
+    }
+  }
 }
 
