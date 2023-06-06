@@ -85,11 +85,11 @@ int32_t main(int32_t argc, char **argv)
 
     auto onSensors{[&od4, &timeStep, &batteryLimit](cluon::data::Envelope &&envelope)
       {
-        auto msg = cluon::extractMessage<Sensors>(
+        auto msg = cluon::extractMessage<tme290::grass::Sensors>(
             move(envelope));
         timeStep++;
 
-        Control control;
+        tme290::grass::Control control;
 
 				batteryLimit = battery_level(msg);
 
@@ -120,7 +120,7 @@ int32_t main(int32_t argc, char **argv)
 
     auto onStatus{[&verbose](cluon::data::Envelope &&envelope)
       {
-        auto msg = cluon::extractMessage<Status>(
+        auto msg = cluon::extractMessage<tme290::grass::Status>(
             move(envelope));
         if(verbose) {
           cout  << "Status at time " << msg.time() << ": " 
@@ -135,14 +135,14 @@ int32_t main(int32_t argc, char **argv)
 
       }};
 
-    od4.dataTrigger(Sensors::ID(), onSensors);
-    od4.dataTrigger(Status::ID(), onStatus);
+    od4.dataTrigger(tme290::grass::Sensors::ID(), onSensors);
+    od4.dataTrigger(tme290::grass::Status::ID(), onStatus);
 
     if(verbose) {
       cout << "All systems ready, let's cut some grass!" << endl;
     }
 
-    Control control;
+    tme290::grass::Control control;
     control.command(0);
     od4.send(control);
 
