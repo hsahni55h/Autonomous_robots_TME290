@@ -28,8 +28,8 @@ using namespace std;
 #include "cluon-complete.hpp"
 #include "tme290-sim-grass-msg.hpp"
 
-#define WALL_LENGTH   (22)
-#define WALL_WIDTH    (17)
+#define WALL_LENGTH   22U
+#define WALL_WIDTH    17U
 
 bool record_position{true};
 bool home_position{false};
