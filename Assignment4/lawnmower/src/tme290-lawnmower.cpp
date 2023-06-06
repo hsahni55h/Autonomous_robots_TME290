@@ -53,15 +53,14 @@ const double rain_threshold{0.4};
 string filename_hourly_average{"hourly_average_data"};
 string filename_battery{"battery_data"};
 
-void generate_csv_file(string& fileName);
-void add_data_csv(const string& line, const string& fileName);
+void generate_csv_file(std::string& fileName); 
+void add_data_csv(const std::string& line, const std::string& fileName); 
 
 double battery_level(Sensors& msg);
-void charging_battery(Sensors& msg, Control& control);
+void charging_battery(tme290::grass::Sensors& msg, tme290::grass::Control& control); 
 
-void cutting_grass(Sensors& msg, Control& control);
-void home_position(Sensors& msg, Control& control);
-
+void cutting_grass(tme290::grass::Sensors& msg, tme290::grass::Control& control); 
+void home_position(tme290::grass::Sensors& msg, tme290::grass::Control& control); 
 
 int32_t main(int32_t argc, char **argv) 
 {
@@ -159,7 +158,7 @@ int32_t main(int32_t argc, char **argv)
 }
 
 
-void generate_csv_file(string& fileName) 
+void generate_csv_file(std::string& fileName) 
 {
   auto tick = chrono::system_clock::now();
   time_t time = chrono::system_clock::to_time_t(tick);
@@ -171,7 +170,7 @@ void generate_csv_file(string& fileName)
 	return;
 }
 
-void add_data_csv(const string& line, const string& fileName) 
+void add_data_csv(const std::string& line, const std::string& fileName) 
 {
   ofstream file(fileName, ios_base::app);
 
@@ -209,7 +208,7 @@ double battery_level(Sensors& msg)
   return distance*0.005;
 }
 
-void charging_battery(Sensors& msg, Control& control)
+void charging_battery(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
 {
   uint32_t x{msg.i()}; 
   uint32_t y{msg.j()};
@@ -259,7 +258,7 @@ void charging_battery(Sensors& msg, Control& control)
 }
 
 
-void cutting_grass(Sensors& msg, Control& control) 
+void cutting_grass(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
 {
   uint32_t x{msg.i()}; 
   uint32_t y{msg.j()};
@@ -299,7 +298,7 @@ void cutting_grass(Sensors& msg, Control& control)
   }
 }
 
-void home_position(Sensors& msg, Control& control) 
+void home_position(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
 {
   uint32_t x{msg.i()};
   uint32_t y{msg.j()};
