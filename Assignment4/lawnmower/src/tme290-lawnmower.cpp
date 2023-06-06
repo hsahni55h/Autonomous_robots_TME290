@@ -24,7 +24,8 @@
 #include <string>
 
 using namespace std;
-using namespace tme290::grass;
+using namespace tme290::grass::Sensors;
+using namespace tme290::grass::Control;
 
 #include "cluon-complete.hpp"
 #include "tme290-sim-grass-msg.hpp"
