@@ -186,8 +186,8 @@ void add_data_csv(const std::string& line, const std::string& fileName)
 
 double battery_level(tme290::grass::Sensors& msg) 
 {
-  uint32_t x{msg.i()}; 
-  uint32_t y{msg.j()};
+  int32_t x{msg.i()}; 
+  int32_t y{msg.j()};
   int32_t distX{0};
   int32_t distY{0};
   double distance{0};
@@ -206,8 +206,8 @@ double battery_level(tme290::grass::Sensors& msg)
 
 void charging_battery(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
 {
-  uint32_t x{msg.i()}; 
-  uint32_t y{msg.j()};
+  int32_t x{msg.i()}; 
+  int32_t y{msg.j()};
 
   charge_battery = x != 0 && y != 0;
 
@@ -256,8 +256,8 @@ void charging_battery(tme290::grass::Sensors& msg, tme290::grass::Control& contr
 
 void cutting_grass(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
 {
-  uint32_t x{msg.i()}; 
-  uint32_t y{msg.j()};
+  int32_t x{msg.i()}; 
+  int32_t y{msg.j()};
 
   if(x == 39 && y == 39) {
     position_x = 23;
@@ -296,8 +296,8 @@ void cutting_grass(tme290::grass::Sensors& msg, tme290::grass::Control& control)
 
 void go_home(tme290::grass::Sensors& msg, tme290::grass::Control& control) 
 {
-  uint32_t x{msg.i()};
-  uint32_t y{msg.j()};
+  int32_t x{msg.i()};
+  int32_t y{msg.j()};
 
   if(x == position_x && y == position_y) {
     home_position = false;
