@@ -31,8 +31,6 @@ using namespace std;
 #define WALL_LENGTH   (22)
 #define WALL_WIDTH    (17)
 
-#define within_boundary   control.command(0)
-
 bool record_position{true};
 bool home_position{false};
 
@@ -100,10 +98,10 @@ int32_t main(int32_t argc, char **argv)
         if((return_charging_dock && !charge_level) || charge_battery || charge_level) {
           charging_battery(msg, control);
         } else if(home_position){
-          home_position(msg, control);
+          go_home(msg, control);
         } else {
           if(timeStep % 2 == 0) {
-            within_boundary(control);
+            control.command(0);
           } else {
             cutting_grass(msg, control);
           }
