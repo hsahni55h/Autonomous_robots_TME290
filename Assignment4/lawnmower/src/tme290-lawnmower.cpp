@@ -254,7 +254,7 @@ int32_t main(int32_t argc, char **argv)
 		initCSVFile(hourlyMeanFileName);
 		initCSVFile(batteryFileName);
 
-    auto onSensors{[&od4, &someVariable](cluon::data::Envelope &&envelope)
+    auto onSensors{[&od4, &timeStep, &batteryLimit](cluon::data::Envelope &&envelope)
       {
         auto msg = cluon::extractMessage<tme290::grass::Sensors>(
             std::move(envelope));
