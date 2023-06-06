@@ -32,14 +32,17 @@ using namespace tme290::grass;
 #define WALL_LENGTH   (22)
 #define WALL_WIDTH    (17)
 
-#define within_boundary control.command(0)
+#define within_boundary   control.command(0)
 
 bool record_position{true};
 bool home_position{false};
+
 bool move_right{true};
+bool return_charging_dock{false};
+
 bool charge_level{false};
 bool charge_battery{false};
-bool return_charging_dock{false};
+
 bool stop_execution{false};
 
 uint32_t position_x{0};
