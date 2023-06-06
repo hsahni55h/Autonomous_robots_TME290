@@ -26,13 +26,17 @@
 #include "cluon-complete.hpp"
 #include "tme290-sim-grass-msg.hpp"
 
-bool doStorePos{true};
-bool returnToPos{false};
-bool towardsRight{true};
-bool charging{false};
-bool goingToCharge{false};
-bool goToCharger{false};
-bool stopRun{false};
+#define WALL_LENGTH   (22)
+#define WALL_WIDTH    (17)
+
+
+bool record_position{true};
+bool home_position{false};
+bool move_right{true};
+bool charge_level{false};
+bool charge_battery{false};
+bool return_charging_dock{false};
+bool stop_execution{false};
 
 uint32_t storedX{0};
 uint32_t storedY{0};
@@ -78,13 +82,13 @@ double getBatteryLimit(tme290::grass::Sensors& msg)
   int32_t distY{0};
   double distance{0};
 
-  if (y < 17) {
+  if (y < WALL_WIDTH) {
     distance = sqrt(pow(x, 2) + pow(y, 2));
   } else {
-    distX = abs(x - 22);
-    distY = abs(y - 17);
+    distX = abs(x - WALL_LENGTH);
+    distY = abs(y - WALL_WIDTH);
     distance = sqrt(pow(distX, 2) + pow(distY, 2));
-    distance += sqrt(pow(22, 2) + pow(17, 2));
+    distance += sqrt(pow(WALL_LENGTH, 2) + pow(WALL_WIDTH, 2));
   }
 
   return distance*0.005;
@@ -98,31 +102,31 @@ void cutGrass(tme290::grass::Sensors& msg, tme290::grass::Control& control)
   if (x == 39 && y == 39) {
     storedX = 23;
     storedY = 18;
-    doStorePos = false;
-    goToCharger = true;
-    towardsRight = true;
+    record_position = false;
+    return_charging_dock = true;
+    move_right = true;
     return;
   } else if (x == 39 && y == 18) {
     storedX = 0;
     storedY = 0;
-    doStorePos = false;
-    goToCharger = true;
-    towardsRight = true;
+    record_position = false;
+    return_charging_dock = true;
+    move_right = true;
     return;
   } 
 
-  if (towardsRight) {
+  if (move_right) {
     if (x < 39) {
       control.command(4);
     } else {
-      towardsRight = false;
+      move_right = false;
       control.command(6);
     }
   } else {
     if (x == 0) {
-      towardsRight = true;
+      move_right = true;
       control.command(6);
-    } else if (y == 17 && x == 22) {
+    } else if (y == WALL_WIDTH && x == WALL_LENGTH) {
       control.command(6);
     } else {
       control.command(8);
@@ -140,28 +144,28 @@ void chargeRobot(tme290::grass::Sensors& msg, tme290::grass::Control& control)
   uint32_t x{msg.i()}; 
   uint32_t y{msg.j()};
 
-  goingToCharge = x != 0 && y != 0;
+  charge_battery = x != 0 && y != 0;
 
-  if (doStorePos) {
+  if (record_position) {
     storedX = x;
     storedY = y;
-    doStorePos = false;
+    record_position = false;
   }
-  if (x == 0 && y == 0 && !charging) {
+  if (x == 0 && y == 0 && !charge_level) {
       std::string line{std::to_string(msg.time()) + "," +
                        std::to_string(msg.battery())};
       appendToCSV(line, batteryFileName);
   }
 
   if (x == 0 && y == 0 && msg.battery() < 1.0) {
-    charging = true;
-    goToCharger = false;
+    charge_level = true;
+    return_charging_dock = false;
     control.command(0);
   } else if (msg.battery() >= 1.0) {
-    charging = false;
-    doStorePos = true;
-    returnToPos = true;
-  } else if (y < 17 ) {
+    charge_level = false;
+    record_position = true;
+    home_position = true;
+  } else if (y < WALL_WIDTH ) {
     if (y == 0) {
       control.command(8);
     } else if (x == 0) {
@@ -170,9 +174,9 @@ void chargeRobot(tme290::grass::Sensors& msg, tme290::grass::Control& control)
       control.command(1);
     }
   } else {
-    if (x > 22) {
+    if (x > WALL_LENGTH) {
       control.command(1);
-    } else if (x == 22) {
+    } else if (x == WALL_LENGTH) {
       control.command(2);
     } else  {
       if (y == 18) {
@@ -190,11 +194,11 @@ void returnToPosition(tme290::grass::Sensors& msg, tme290::grass::Control& contr
   uint32_t y{msg.j()};
 
   if (x == storedX && y == storedY) {
-    returnToPos = false;
+    home_position = false;
     return;
   }
   
-  if (storedY < 17) {
+  if (storedY < WALL_WIDTH) {
     if (x == storedX) {
       control.command(6);
     } else if (y == storedY) {
@@ -203,12 +207,12 @@ void returnToPosition(tme290::grass::Sensors& msg, tme290::grass::Control& contr
       control.command(5);
     }
   } else {
-    if (x < 22 && y < 16) {
+    if (x < WALL_LENGTH && y < 16) {
         control.command(5);
-      } else if (x < 22 && y == 16) {
+      } else if (x < WALL_LENGTH && y == 16) {
         control.command(4);
       }
-    else if (storedX >= 22) {
+    else if (storedX >= WALL_LENGTH) {
       if (x == storedX) {
         control.command(6);
       } else if (y == storedY) {
@@ -264,13 +268,13 @@ int32_t main(int32_t argc, char **argv)
 
 				batteryLimit = getBatteryLimit(msg);
 
-        if (msg.battery() < batteryLimit || (msg.rain() >= rainLimit && !returnToPos && msg.i() + msg.j() != 0)) {
-          goToCharger = true;
+        if (msg.battery() < batteryLimit || (msg.rain() >= rainLimit && !home_position && msg.i() + msg.j() != 0)) {
+          return_charging_dock = true;
         } 
         
-        if ((goToCharger && !charging) || goingToCharge || charging) {
+        if ((return_charging_dock && !charge_level) || charge_battery || charge_level) {
           chargeRobot(msg, control);
-        } else if (returnToPos){
+        } else if (home_position){
           returnToPosition(msg, control);
         } else {
           if (timeStep % 2 == 0) {
@@ -286,7 +290,7 @@ int32_t main(int32_t argc, char **argv)
         od4.send(control);
 				// TODO: some stop message
 				if (msg.time() == 288000) {
-          stopRun = true;
+          stop_execution = true;
         }
       }};
 
@@ -320,7 +324,7 @@ int32_t main(int32_t argc, char **argv)
     od4.send(control);
 
 		// TODO: some minor stuff in while
-    while (od4.isRunning() && !stopRun) {
+    while (od4.isRunning() && !stop_execution) {
       std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
