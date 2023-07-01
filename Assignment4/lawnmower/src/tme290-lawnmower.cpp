@@ -111,7 +111,7 @@ int32_t main(int32_t argc, char **argv)
          msg.rainCloudDirX() << ", " << msg.rainCloudDirY() << ")" << endl; 
 
         od4.send(control);
-				if(msg.time() == 288000) {
+				if(msg.time() == 144000) {
           stop_execution = true;
         }
       }};
